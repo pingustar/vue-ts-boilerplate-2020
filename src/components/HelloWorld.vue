@@ -1,18 +1,25 @@
 <template>
-  <div>
-    <b-btn
-      variant="primary"
-      @click="login"
-    >
-      Login
-    </b-btn>
-    <b-btn
-      variant="primary"
-      @click="getUsers"
-    >
-      Get Users
-    </b-btn>
-  </div>
+  <b-table
+    responsive
+    striped
+    hover
+    head-variant="dark"
+    :sort-by.sync="sortBy"
+    :sort-desc.sync="sortDesc"
+    :fields="fields"
+    :items="documents"
+  >
+    <!-- A custom formatted column -->
+    <template v-slot:cell(categories)="data">
+      <b-badge
+        v-for="category in data.value"
+        :key="category.id"
+        class="small mx-1"
+      >
+        {{ category.name.toUpperCase() }}
+      </b-badge>
+    </template>
+  </b-table>
 </template>
 
 <script lang="ts">
@@ -21,40 +28,47 @@ import api from '@/util/api';
 
 @Component
 export default class HelloWorld extends Vue {
-  @Prop() private msg!: string;
+  private documents: any[] = [];
 
-  getUsers = async () => {
-    // api.defaults.withCredentials = true;
-    // eslint-disable-next-line max-len
-    const Cookie = 'JwtCookieKey=s%3AeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoxLCJpYXQiOjE1NzQyOTU1MzMsImV4cCI6MTU3NDU1NDczM30.xUIkdmeogvVja77bIYWjhUQmjqR0jlyzqfQIoe49xug.22V39u5StbHCuhM8QdRk%2B3pbMGU0l4eDVJxib%2BeAi5s';
-    //
-    // api.defaults.headers.common.Cookie = Cookie;
+  private sortBy = 'id';
 
-    const axiosConfig = {
-      headers: {
-        'content-Type': 'application/json',
-        Accept: 'application/json',
-        'Cache-Control': 'no-cache',
-        Authorization: `${Cookie}`,
-      },
-      // withCredentials: true,
+  private sortDesc = true;
+
+  private fields = [
+    {
+      key: 'id',
+      sortable: true,
+    },
+    {
+      key: 'sender',
+      sortable: true,
+    },
+    {
+      key: 'subject',
+      sortable: false,
+    },
+    {
+      key: 'createdAt',
+      sortable: true,
+    },
+    {
+      key: 'categories',
+      sortable: false,
+    },
+  ]
+
+  async getDocuments() {
+    const params = {
+      type: 1,
+      categories: [],
     };
-    // api.defaults.withCredentials = true;
-    const resp = await api.get('users/all',
-      axiosConfig);
+    const documents = await api.get('documents/filter', { params });
+    this.documents = documents.data.documents;
+  }
 
-    // const resp = await api.get('users/all');
-    console.log(resp.data.users);
-  };
-
-  login = async () => {
-    const user = {
-      email: 'jan@test.com',
-      password: 'Password@1',
-    };
-    const resp = await api.post('auth/login', user);
-    console.log(resp);
-  };
+  async mounted() {
+    await this.getDocuments();
+  }
 }
 </script>
 
