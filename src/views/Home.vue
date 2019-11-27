@@ -1,9 +1,11 @@
 <template>
-  <b-container>
-    <b-row>
-      <HelloWorld />
+  <div>
+    <b-row class="mt-5">
+      <b-col cols="12">
+        <HelloWorld />
+      </b-col>
     </b-row>
-  </b-container>
+  </div>
 </template>
 
 <script>
