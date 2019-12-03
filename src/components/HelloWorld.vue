@@ -60,6 +60,9 @@
           </b-button>
         </b-card>
       </template>
+      <template v-slot:cell(createdAt)="data">
+        {{ moment(data.value).format("MMM Do YY") }}
+      </template>
       <!-- A custom formatted column -->
       <template v-slot:cell(categories)="data">
         <b-badge
@@ -76,11 +79,14 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import moment from 'moment';
 import api from '@/util/api';
 
 @Component
 export default class HelloWorld extends Vue {
   private documents: any[] = [];
+
+  private moment = moment;
 
   private sortBy = 'id';
 
@@ -96,7 +102,8 @@ export default class HelloWorld extends Vue {
       sortable: true,
     },
     {
-      key: 'sender',
+      key: 'sender.name',
+      label: 'Sender',
       sortable: true,
     },
     {

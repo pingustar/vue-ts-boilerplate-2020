@@ -20,10 +20,20 @@
                 <b-form-input
                   id="input-1"
                   v-model="form.sender"
+                  list="input-1-list"
                   type="text"
                   required
                   placeholder="Enter Sender"
                 />
+
+                <datalist id="input-1-list">
+                  <option
+                    v-for="sender in senders"
+                    :key="sender"
+                  >
+                    {{ sender }}
+                  </option>
+                </datalist>
               </b-form-group>
             </b-col>
             <b-col
@@ -55,10 +65,10 @@
                 label-for="input-1"
               >
                 <v-select
+                  v-model="form.categories"
                   taggable
                   multiple
-                  v-model="form.categories"
-                  :options="[]"
+                  :options="this.categories"
                 />
               </b-form-group>
             </b-col>
@@ -111,7 +121,26 @@
           </div>
         </b-form>
       </b-col>
+      <b-col
+        cols="12"
+        class="mt-3"
+      >
+        <b-alert
+          :show="errors.length"
+          variant="danger"
+          dismissible
+          @dismissed="errors = []"
+        >
+          <p
+            v-for="(e, index) in errors"
+            :key="index"
+          >
+            {{ e.msg }}
+          </p>
+        </b-alert>
+      </b-col>
     </b-row>
+    {{ errors.length }}
   </div>
 </template>
 
@@ -122,6 +151,12 @@ import api from '@/util/api';
 @Component
 export default class AddDocument extends Vue {
   private loading = false;
+
+  private errors = [];
+
+  private categories: string[] = [];
+
+  private senders: string[] = [];
 
   private form = {
     sender: '',
@@ -139,7 +174,13 @@ export default class AddDocument extends Vue {
     console.log(this.form.categories);
     evt.preventDefault();
     try {
-      const resp = await api.post('documents/add', { document: this.form });
+      const resp = await api({
+        method: 'post',
+        responseType: 'json',
+        url: 'documents/add',
+        data: { document: this.form },
+      });
+      // const resp = await api.post('documents/add', { document: this.form });
       // @ts-ignore
       this.$router.push({ name: 'documents' });
       await this.resetForm();
@@ -150,11 +191,33 @@ export default class AddDocument extends Vue {
         autoHideDelay: 3000,
         appendToast: true,
       });
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      if (error.response) {
+        this.errors = error.response.data.error;
+      }
     } finally {
       this.loading = false;
     }
+  }
+
+  async getCategories() {
+    this.categories = [];
+    const resp = await api.get('documents/categories');
+    // eslint-disable-next-line no-restricted-syntax
+    for (const cat of resp.data.categories) {
+      this.categories.push(cat.name);
+    }
+    console.log(this.categories);
+  }
+
+  async getSenders() {
+    this.senders = [];
+    const resp = await api.get('documents/senders');
+    // eslint-disable-next-line no-restricted-syntax
+    for (const s of resp.data.senders) {
+      this.senders.push(s.name);
+    }
+    console.log(this.senders);
   }
 
   async onReset(evt: any) {
@@ -177,6 +240,11 @@ export default class AddDocument extends Vue {
     this.$nextTick(() => {
       this.show = true;
     });
+  }
+
+  async created() {
+    await this.getCategories();
+    await this.getSenders();
   }
 }
 </script>
