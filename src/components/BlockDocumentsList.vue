@@ -119,7 +119,7 @@ export default class BlockDocumentsList extends Vue {
   async getDocuments() {
     const params = {
       type: 1,
-      categories: [],
+      senders: [5],
     };
     const documents = await api.get('documents/filter', { params });
     this.documents = documents.data.documents;

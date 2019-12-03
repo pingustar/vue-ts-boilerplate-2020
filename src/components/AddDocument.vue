@@ -100,11 +100,11 @@
               label="Categories:"
               label-for="input-1"
             >
-              <v-select
-                v-model="form.categories"
-                taggable
-                multiple
-                :options="categories"
+              <vue-tags-input
+                v-model="category"
+                :tags="form.categories"
+                :autocomplete-items="categories"
+                @tags-changed="newTags => form.categories = newTags"
               />
             </b-form-group>
           </b-col>
@@ -178,15 +178,23 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+// @ts-ignore
+import VueTagsInput from '@johmun/vue-tags-input';
 import api from '@/util/api';
 
-@Component
+@Component({
+  components: {
+    VueTagsInput,
+  },
+})
 export default class AddDocument extends Vue {
   private loading = false;
 
   private errors = [];
 
   private categories: string[] = [];
+
+  private category: string = '';
 
   private senders: string[] = [];
 
@@ -239,7 +247,6 @@ export default class AddDocument extends Vue {
     for (const cat of resp.data.categories) {
       this.categories.push(cat.name);
     }
-    console.log(this.categories);
   }
 
   async getSenders() {
