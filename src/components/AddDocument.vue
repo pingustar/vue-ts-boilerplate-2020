@@ -1,146 +1,178 @@
 <template>
-  <div>
-    <b-row>
-      <b-col cols="12">
-        <b-form
-          v-if="show"
-          @submit="onSubmit"
-          @reset="onReset"
+  <!-- Document List -->
+  <div class="block">
+    <div class="block-header block-header-default">
+      <div class="block-title">
+        <strong>Add Document</strong> <span class="font-size-sm text-muted">- Provide Document Details</span>
+      </div>
+      <div class="block-options">
+        <button
+          type="button"
+          class="btn-block-option"
+          data-toggle="block-option"
         >
-          <b-row>
-            <b-col
-              md="5"
-              lg="4"
-            >
-              <b-form-group
-                id="input-group-1"
-                label="Sender:"
-                label-for="input-1"
-              >
-                <b-form-input
-                  id="input-1"
-                  v-model="form.sender"
-                  list="input-1-list"
-                  type="text"
-                  required
-                  placeholder="Enter Sender"
-                />
-
-                <datalist id="input-1-list">
-                  <option
-                    v-for="sender in senders"
-                    :key="sender"
-                  >
-                    {{ sender }}
-                  </option>
-                </datalist>
-              </b-form-group>
-            </b-col>
-            <b-col
-              md="7"
-              lg="8"
-            >
-              <b-form-group
-                id="input-group-2"
-                label="Subject:"
-                label-for="input-2"
-              >
-                <b-form-input
-                  id="input-2"
-                  v-model="form.subject"
-                  required
-                  placeholder="Enter Subject"
-                />
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col
-              md="7"
-              lg="8"
-            >
-              <b-form-group
-                id="input-group-x"
-                label="Categories:"
-                label-for="input-1"
-              >
-                <v-select
-                  v-model="form.categories"
-                  taggable
-                  multiple
-                  :options="this.categories"
-                />
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <div class="d-flex justify-content-between">
-            <div class="d-flex">
-              <b-form-group
-                id="input-group-3"
-                class="m-0 mr-5"
-              >
-                <b-form-checkbox
-                  id="checkbox-1"
-                  v-model="form.keepPaper"
-                  name="checkbox-1"
-                >
-                  Keep Paper
-                </b-form-checkbox>
-              </b-form-group>
-
-              <b-form-group
-                id="input-group-4"
-                class="m-0"
-              >
-                <b-form-checkbox
-                  id="checkbox-2"
-                  v-model="form.actionRequired"
-                  name="checkbox-2"
-                >
-                  Action Required
-                </b-form-checkbox>
-              </b-form-group>
-            </div>
-            <div>
-              <b-button
-                type="submit"
-                variant="primary"
-                class="mr-2"
-                :disabled="loading"
-              >
-                Submit
-              </b-button>
-              <b-button
-                type="reset"
-                variant="danger"
-                :disabled="loading"
-              >
-                Reset
-              </b-button>
-            </div>
-          </div>
-        </b-form>
-      </b-col>
-      <b-col
-        cols="12"
-        class="mt-3"
+          <i class="si si-arrow-left" />
+        </button>
+        <button
+          type="button"
+          class="btn-block-option"
+          data-toggle="block-option"
+        >
+          <i class="si si-arrow-right" />
+        </button>
+        <button
+          type="button"
+          class="btn-block-option"
+          data-toggle="block-option"
+          data-action="state_toggle"
+          data-action-mode="demo"
+        >
+          <i class="si si-refresh" />
+        </button>
+        <button
+          type="button"
+          class="btn-block-option"
+          data-toggle="block-option"
+          data-action="fullscreen_toggle"
+        />
+      </div>
+    </div>
+    <div class="block-content">
+      <b-form
+        v-if="show"
+        @submit="onSubmit"
+        @reset="onReset"
       >
-        <b-alert
-          :show="errors.length"
-          variant="danger"
-          dismissible
-          @dismissed="errors = []"
-        >
-          <p
-            v-for="(e, index) in errors"
-            :key="index"
+        <b-row>
+          <b-col
+            md="5"
+            lg="4"
           >
-            {{ e.msg }}
-          </p>
-        </b-alert>
-      </b-col>
-    </b-row>
-    {{ errors.length }}
+            <b-form-group
+              id="input-group-1"
+              label="Sender:"
+              label-for="input-1"
+            >
+              <b-form-input
+                id="input-1"
+                v-model="form.sender"
+                list="input-1-list"
+                type="text"
+                required
+                placeholder="Enter Sender"
+              />
+
+              <datalist id="input-1-list">
+                <option
+                  v-for="sender in senders"
+                  :key="sender"
+                >
+                  {{ sender }}
+                </option>
+              </datalist>
+            </b-form-group>
+          </b-col>
+          <b-col
+            md="7"
+            lg="8"
+          >
+            <b-form-group
+              id="input-group-2"
+              label="Subject:"
+              label-for="input-2"
+            >
+              <b-form-input
+                id="input-2"
+                v-model="form.subject"
+                required
+                placeholder="Enter Subject"
+              />
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col
+            md="7"
+            lg="8"
+          >
+            <b-form-group
+              id="input-group-x"
+              label="Categories:"
+              label-for="input-1"
+            >
+              <v-select
+                v-model="form.categories"
+                taggable
+                multiple
+                :options="categories"
+              />
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <div class="d-flex justify-content-between">
+          <div class="d-flex">
+            <b-form-group
+              id="input-group-3"
+              class="m-0 mr-5"
+            >
+              <b-form-checkbox
+                id="checkbox-1"
+                v-model="form.keepPaper"
+                name="checkbox-1"
+              >
+                Keep Paper
+              </b-form-checkbox>
+            </b-form-group>
+
+            <b-form-group
+              id="input-group-4"
+              class="m-0"
+            >
+              <b-form-checkbox
+                id="checkbox-2"
+                v-model="form.actionRequired"
+                name="checkbox-2"
+              >
+                Action Required
+              </b-form-checkbox>
+            </b-form-group>
+          </div>
+          <div>
+            <b-button
+              type="reset"
+              variant="secondary"
+              class="btn-noborder mr-2"
+              :disabled="loading"
+            >
+              Reset
+            </b-button>
+            <b-button
+              type="submit"
+              variant="primary"
+              class="btn-noborder"
+              :disabled="loading"
+            >
+              Submit
+            </b-button>
+          </div>
+        </div>
+      </b-form>
+    </div>
+    <div class="block-content">
+      <b-alert
+        :show="errors.length"
+        variant="danger"
+        dismissible
+        @dismissed="errors = []"
+      >
+        <p
+          v-for="(e, index) in errors"
+          :key="index"
+        >
+          {{ e.msg }}
+        </p>
+      </b-alert>
+    </div>
   </div>
 </template>
 

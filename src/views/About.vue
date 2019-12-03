@@ -1,5 +1,9 @@
 <template>
-  <add-document />
+  <b-row>
+    <b-col cols="12">
+      <add-document />
+    </b-col>
+  </b-row>
 </template>
 
 <script>
