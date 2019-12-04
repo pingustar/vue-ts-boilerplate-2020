@@ -43,15 +43,15 @@
             class="nav-item"
           >
             <a
-              class="nav-link d-flex align-items-center justify-content-between"
+              class="nav-link d-flex align-items-center justify-content-start"
               href="javascript:void(0)"
             >
-              <span>
-                <img
-                  class="img-avatar img-avatar20 mr-5"
-                  :src="getSenderLogo(sender)"
-                  :alt="sender.name"
-                >
+              <img
+                class="img-avatar img-avatar20 mr-1"
+                :src="getSenderLogo(sender)"
+                :alt="sender.name"
+              >
+              <span class="ml-5">
                 {{ sender.name }}
               </span>
             </a>

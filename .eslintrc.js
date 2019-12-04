@@ -15,6 +15,7 @@ module.exports = {
     'no-console': 'off',
     'no-debugger': 'off',
     'max-len': ['error', { 'code': 120 }],
+    'class-methods-use-this': 'off',
   },
 
   parserOptions: {

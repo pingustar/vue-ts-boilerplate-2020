@@ -97,14 +97,20 @@
           >
             <b-form-group
               id="input-group-x"
-              label="Categories:"
-              label-for="input-1"
+              label="Labels:"
+              label-for="input-tags"
             >
-              <vue-tags-input
+              <tags-input
                 v-model="category"
-                :tags="form.categories"
-                :autocomplete-items="categories"
-                @tags-changed="newTags => form.categories = newTags"
+                element-id="input-tags"
+                :existing-tags="categories"
+                placeholder="Enter Label"
+                :typeahead="true"
+                :typeahead-always-show="true"
+                :typeahead-hide-discard="true"
+                wrapper-class="form-control"
+                @tag-added="onTagAdded"
+                @tag-removed="onTagRemoved"
               />
             </b-form-group>
           </b-col>
@@ -141,7 +147,7 @@
             <b-button
               type="reset"
               variant="secondary"
-              class="btn-noborder mr-2"
+              class="btn-noborder btn-rounded mr-2"
               :disabled="loading"
             >
               Reset
@@ -149,7 +155,7 @@
             <b-button
               type="submit"
               variant="primary"
-              class="btn-noborder"
+              class="btn-noborder btn-rounded"
               :disabled="loading"
             >
               Submit
@@ -178,23 +184,17 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-// @ts-ignore
-import VueTagsInput from '@johmun/vue-tags-input';
 import api from '@/util/api';
 
-@Component({
-  components: {
-    VueTagsInput,
-  },
-})
+@Component
 export default class AddDocument extends Vue {
   private loading = false;
 
   private errors = [];
 
-  private categories: string[] = [];
+  private categories: any[] = [];
 
-  private category: string = '';
+  private category: any[] = [];
 
   private senders: string[] = [];
 
@@ -204,7 +204,7 @@ export default class AddDocument extends Vue {
     keepPaper: false,
     actionRequired: false,
     type: 0,
-    categories: [],
+    categories: [] as string[],
   }
 
   private show = true
@@ -245,7 +245,7 @@ export default class AddDocument extends Vue {
     const resp = await api.get('documents/categories');
     // eslint-disable-next-line no-restricted-syntax
     for (const cat of resp.data.categories) {
-      this.categories.push(cat.name);
+      this.categories.push({ key: cat.id, value: cat.name });
     }
   }
 
@@ -257,6 +257,14 @@ export default class AddDocument extends Vue {
       this.senders.push(s.name);
     }
     console.log(this.senders);
+  }
+
+  async onTagAdded(slug: any) {
+    this.form.categories.push(slug.value);
+  }
+
+  onTagRemoved(slug: any) {
+    console.log(`Tag removed: ${slug}`);
   }
 
   async onReset(evt: any) {
