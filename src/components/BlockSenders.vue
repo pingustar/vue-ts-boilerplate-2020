@@ -4,7 +4,7 @@
     <div class="block">
       <div class="block-header block-header-default">
         <h3 class="block-title">
-          Senders
+          Contacts
         </h3>
         <div class="block-options">
           <div class="dropdown">
@@ -38,13 +38,13 @@
       <div class="block-content">
         <ul class="nav nav-pills flex-column push">
           <li
-            v-for="sender in senders"
+            v-for="sender in sortedSenders"
             :key="sender.id"
             class="nav-item"
           >
-            <a
+            <router-link
               class="nav-link d-flex align-items-center justify-content-start"
-              href="javascript:void(0)"
+              :to="{ name: 'documents', query: { sender: sender.name } }"
             >
               <img
                 class="img-avatar img-avatar20 mr-1"
@@ -54,7 +54,7 @@
               <span class="ml-5">
                 {{ sender.name }}
               </span>
-            </a>
+            </router-link>
           </li>
         </ul>
       </div>
@@ -71,11 +71,26 @@ interface ISender {
   id: number;
   name: string;
   logo?: string;
+  senderCount: string;
 }
 
 @Component
 export default class BlockSenders extends Vue {
   private senders: ISender[] = [];
+
+  get sortedSenders() {
+    function compare(a: ISender, b: ISender) {
+      if (a.senderCount > b.senderCount) {
+        return -1;
+      }
+      if (a.senderCount < b.senderCount) {
+        return 1;
+      }
+      return 0;
+    }
+
+    return this.senders.sort(compare);
+  }
 
   // eslint-disable-next-line class-methods-use-this
   getSenderLogo(sender: ISender): string {

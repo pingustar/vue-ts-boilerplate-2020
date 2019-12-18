@@ -51,6 +51,9 @@
             >
               {{ doc.id }}
             </td>
+            <td>
+              <span>{{ docType(doc.type) }}</span>
+            </td>
             <td style="width: 70px;">
               <img
                 class="img-avatar img-avatar48"
@@ -70,7 +73,7 @@
               class="d-none d-xl-table-cell font-w600 font-size-sm text-muted"
               style="width: 120px;"
             >
-              {{ moment(doc.createdAt).format("MMM Do YY") }}
+              {{ moment(doc.date || doc.createdAt).format("MMM Do YY") }}
             </td>
           </tr>
         </tbody>
@@ -82,32 +85,36 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import {
+  Component, Prop, Vue, Watch,
+} from 'vue-property-decorator';
 import moment from 'moment';
 import api from '@/util/api';
 
-interface ISender {
-  id: number;
-  name: string;
-  logo?: string;
-}
+  interface ISender {
+    id: number;
+    name: string;
+    logo?: string;
+  }
 
 export interface IDocument {
-  id: number;
-  sender: ISender;
-  subject: string;
-  type: any;
-  categories: any[];
-  keepPaper: boolean;
-  actionRequired: boolean;
-  createdAt: any;
-}
+    id: number;
+    sender: ISender;
+    subject: string;
+    type: any;
+    categories: any[];
+    keepPaper: boolean;
+    actionRequired: boolean;
+    createdAt: any;
+  }
 
 @Component
 export default class BlockDocumentsList extends Vue {
   private documents: IDocument[] = [];
 
   private moment = moment;
+
+  private params: any = {};
 
   // eslint-disable-next-line class-methods-use-this
   getSenderLogo(sender: ISender): string {
@@ -116,13 +123,33 @@ export default class BlockDocumentsList extends Vue {
     return res;
   }
 
+  docType(type: number): string {
+    switch (type) {
+      case 0: {
+        return 'IN';
+      }
+      case 1: {
+        return 'OUT';
+      }
+      case 2: {
+        return 'Draft';
+      }
+      default: {
+        return '??';
+      }
+    }
+  }
+
   async getDocuments() {
-    const params = {
-      type: 1,
-      senders: [],
-    };
-    const documents = await api.get('documents/filter', { params });
+    this.params.sender = this.$route.query.sender;
+    this.params.categories = this.$route.query.categories;
+    const documents = await api.get('documents/filter', { params: this.params });
     this.documents = documents.data.documents;
+  }
+
+  @Watch('$route.query')
+  async onQueryChange(newVal: any, oldVal: any) {
+    await this.getDocuments();
   }
 
   async mounted() {

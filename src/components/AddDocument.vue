@@ -39,18 +39,32 @@
     </div>
     <div class="block-content">
       <b-form
-        v-if="show"
         @submit="onSubmit"
         @reset="onReset"
       >
         <b-row>
           <b-col
-            md="5"
+            md="3"
+            lg="2"
+          >
+            <b-form-group
+              id="input-group-type"
+              label="Type:"
+              label-for="input-type"
+            >
+              <b-form-select
+                v-model="form.type"
+                :options="documentTypes"
+              />
+            </b-form-group>
+          </b-col>
+          <b-col
+            md="4"
             lg="4"
           >
             <b-form-group
               id="input-group-1"
-              label="Sender:"
+              label="Contact:"
               label-for="input-1"
             >
               <b-form-input
@@ -58,7 +72,6 @@
                 v-model="form.sender"
                 list="input-1-list"
                 type="text"
-                required
                 placeholder="Enter Sender"
               />
 
@@ -73,8 +86,8 @@
             </b-form-group>
           </b-col>
           <b-col
-            md="7"
-            lg="8"
+            md="5"
+            lg="6"
           >
             <b-form-group
               id="input-group-2"
@@ -84,7 +97,6 @@
               <b-form-input
                 id="input-2"
                 v-model="form.subject"
-                required
                 placeholder="Enter Subject"
               />
             </b-form-group>
@@ -92,9 +104,22 @@
         </b-row>
         <b-row>
           <b-col
-            md="7"
-            lg="8"
+            md="5"
+            lg="4"
           >
+            <b-form-group
+              id="input-group-date"
+              label="Date:"
+              label-for="input-date"
+            >
+              <b-form-input
+                id="input-date"
+                v-model="form.date"
+                placeholder="Enter Date"
+              />
+            </b-form-group>
+          </b-col>
+          <b-col style="min-height: 110px">
             <b-form-group
               id="input-group-x"
               label="Labels:"
@@ -114,54 +139,90 @@
               />
             </b-form-group>
           </b-col>
+          <b-col>
+            <b-form-group
+              id="input-group-file"
+              label="Upload Document:"
+              label-for="input-file"
+            >
+              <b-form-file
+                id="input-file"
+                v-model="docFile"
+                :state="Boolean(docFile) ? true : null"
+                placeholder="Choose a file or drop it here..."
+                drop-placeholder="Drop file here..."
+              />
+            </b-form-group>
+          </b-col>
         </b-row>
-        <div class="d-flex justify-content-between">
-          <div class="d-flex">
+        <b-row>
+          <b-col
+            cols="12"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <b-form-group label="Additional Options:">
+                <b-form-checkbox
+                  v-model="form.actionRequired"
+                  name="form-actionRequired"
+                  inline
+                >
+                  Action Required
+                </b-form-checkbox>
+                <b-form-checkbox
+                  v-model="form.keepPaper"
+                  name="form-keepPaper"
+                  inline
+                >
+                  Keep Paper
+                </b-form-checkbox>
+                <b-form-checkbox
+                  v-model="memo"
+                  name="form-addmemo"
+                  inline
+                >
+                  Add Memo
+                </b-form-checkbox>
+              </b-form-group>
+              <div>
+                <b-button
+                  type="reset"
+                  variant="secondary"
+                  class="btn-noborder btn-rounded mr-2"
+                  :disabled="loading"
+                >
+                  Reset
+                </b-button>
+                <b-button
+                  type="submit"
+                  variant="primary"
+                  class="btn-noborder btn-rounded"
+                  :disabled="loading"
+                >
+                  Submit
+                </b-button>
+              </div>
+            </div>
+          </b-col>
+          <b-col
+            v-if="memo"
+            md="8"
+            lg="6"
+          >
             <b-form-group
-              id="input-group-3"
-              class="m-0 mr-5"
+              id="input-group-memo"
+              label="Memo:"
+              label-for="formmemo"
             >
-              <b-form-checkbox
-                id="checkbox-1"
-                v-model="form.keepPaper"
-                name="checkbox-1"
-              >
-                Keep Paper
-              </b-form-checkbox>
+              <b-form-textarea
+                id="formmemo"
+                v-model="form.memo"
+                placeholder="Enter memo here..."
+                rows="2"
+                max-rows="6"
+              />
             </b-form-group>
-
-            <b-form-group
-              id="input-group-4"
-              class="m-0"
-            >
-              <b-form-checkbox
-                id="checkbox-2"
-                v-model="form.actionRequired"
-                name="checkbox-2"
-              >
-                Action Required
-              </b-form-checkbox>
-            </b-form-group>
-          </div>
-          <div>
-            <b-button
-              type="reset"
-              variant="secondary"
-              class="btn-noborder btn-rounded mr-2"
-              :disabled="loading"
-            >
-              Reset
-            </b-button>
-            <b-button
-              type="submit"
-              variant="primary"
-              class="btn-noborder btn-rounded"
-              :disabled="loading"
-            >
-              Submit
-            </b-button>
-          </div>
-        </div>
+          </b-col>
+        </b-row>
       </b-form>
     </div>
     <div class="block-content">
@@ -186,17 +247,36 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import api from '@/util/api';
 
+enum DocumentTypes {
+  Received,
+  Sent,
+  Draft}
+
+type TDocumentTypes =
+        DocumentTypes.Received |
+        DocumentTypes.Sent | DocumentTypes.Draft;
+
 @Component
 export default class AddDocument extends Vue {
   private loading = false;
 
   private errors = [];
 
+  documentTypes = [
+    { value: DocumentTypes.Received, text: 'Received' },
+    { value: DocumentTypes.Sent, text: 'Sent' },
+    { value: DocumentTypes.Draft, text: 'Draft' },
+  ]
+
   private categories: any[] = [];
 
   private category: any[] = [];
 
   private senders: string[] = [];
+
+  memo = false
+
+  docFile: File | null = null
 
   private form = {
     sender: '',
@@ -205,24 +285,37 @@ export default class AddDocument extends Vue {
     actionRequired: false,
     type: 0,
     categories: [] as string[],
+    date: '',
+    memo: '',
   }
-
-  private show = true
 
   async onSubmit(evt: any) {
     this.loading = true;
     console.log(this.form.categories);
     evt.preventDefault();
     try {
-      const resp = await api({
-        method: 'post',
-        responseType: 'json',
-        url: 'documents/add',
-        data: { document: this.form },
-      });
+      const formData = new FormData();
+      // @ts-ignore
+      formData.append('docFile', this.docFile);
+      formData.append('sender', this.form.sender);
+      formData.append('subject', this.form.subject);
+      formData.append('keepPaper', JSON.stringify(this.form.keepPaper));
+      formData.append('actionRequired', JSON.stringify(this.form.actionRequired));
+      formData.append('categories', JSON.stringify(this.form.categories));
+      formData.append('type', this.form.type.toString());
+      formData.append('date', this.form.date);
+      formData.append('memo', this.form.memo);
+
+      const resp = await api.post('documents/add',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       // const resp = await api.post('documents/add', { document: this.form });
       // @ts-ignore
-      this.$router.push({ name: 'documents' });
+      await this.$router.push({ name: 'documents' });
       await this.resetForm();
       // @ts-ignore
       this.$bvToast.toast(resp.data, {
@@ -279,14 +372,12 @@ export default class AddDocument extends Vue {
       subject: '',
       keepPaper: false,
       actionRequired: false,
-      type: 0,
+      type: DocumentTypes.Received,
       categories: [],
+      date: '',
+      memo: '',
     };
-    // Trick to reset/clear native browser form validation state
-    this.show = false;
-    this.$nextTick(() => {
-      this.show = true;
-    });
+    this.memo = false;
   }
 
   async created() {

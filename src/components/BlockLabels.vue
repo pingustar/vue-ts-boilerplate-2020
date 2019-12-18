@@ -38,17 +38,17 @@
       <div class="block-content">
         <ul class="nav nav-pills flex-column push">
           <li
-            v-for="label in labels"
+            v-for="label in sortedLabels"
             :key="label.id"
             class="nav-item"
           >
-            <a
+            <router-link
               class="nav-link d-flex align-items-center justify-content-between"
-              href="javascript:void(0)"
+              :to="{ name: 'documents', query: getFilter(label.name) }"
             >
               <span><i class="fa fa-fw fa-inbox mr-5" /> {{ label.name }}</span>
-              <span class="badge badge-pill badge-secondary">0</span>
-            </a>
+              <span class="badge badge-pill badge-secondary">{{ label.docCount }}</span>
+            </router-link>
           </li>
         </ul>
       </div>
@@ -64,11 +64,36 @@ import api from '@/util/api';
 interface ILabel {
   id: number;
   name: string;
+  docCount: number;
 }
 
 @Component
 export default class BlockLabels extends Vue {
   private labels: ILabel[] = [];
+
+  get sortedLabels() {
+    function compare(a: ILabel, b: ILabel) {
+      if (a.docCount > b.docCount) {
+        return -1;
+      }
+      if (a.docCount < b.docCount) {
+        return 1;
+      }
+      return 0;
+    }
+
+    return this.labels.sort(compare);
+  }
+
+  getFilter(c: string) {
+    const q: any = {
+      sender: '',
+      categories: [],
+    };
+    if (this.$route.query.sender) q.sender = this.$route.query.sender;
+    q.categories = [c];
+    return q;
+  }
 
   async getLabels() {
     const documents = await api.get('documents/categories');
